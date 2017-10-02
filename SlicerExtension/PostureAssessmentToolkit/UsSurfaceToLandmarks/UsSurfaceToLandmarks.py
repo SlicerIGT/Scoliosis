@@ -677,7 +677,7 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
     CoronalSliceImages = []
     Extent = ImageData.GetExtent()
     
-    #print "DEGUG - Island remover instantiated"
+    #print "DEBUG - Island remover instantiated"
     
     for A in range(Extent[2], Extent[3]):  # Take projetion alond A-P line, posterior to anterior direction
       CurrentSliceImageData = vtk.vtkImageData()
@@ -748,7 +748,7 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
       rSamples.InsertNextValue(r.GetValue(SampleIndex))
       aSamples.InsertNextValue(a.GetValue(SampleIndex))
     
-      print str(rSamples.GetValue(SmplNum)) + ", " + str(aSamples.GetValue(SmplNum)) + ", " + str(sSamples.GetValue(SmplNum)) 
+      #print str(rSamples.GetValue(SmplNum)) + ", " + str(aSamples.GetValue(SmplNum)) + ", " + str(sSamples.GetValue(SmplNum)) 
     
       s.RemoveTuple(SampleIndex)
       r.RemoveTuple(SampleIndex)
@@ -806,7 +806,7 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
     km.SetTestOption(True)
     km.SetAssessOption(False)
     
-    print "DEBUG - vtkKMeansStatistics initialized"
+    #print "DEBUG - vtkKMeansStatistics initialized"
     
     # Iteratively try increasing cluster numbers up to 34, requiring a minimum of 6 landmarks
     MinErr = 9999999999         # LargeNumber
@@ -817,9 +817,9 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
       # Get cluster centers
       
       OutMetaDS = vtk.vtkMultiBlockDataSet.SafeDownCast(km.GetOutputDataObject(vtk.vtkStatisticsAlgorithm.OUTPUT_MODEL))
-      print OutMetaDS
+      #print OutMetaDS
       OutMetaTable = vtk.vtkTable.SafeDownCast(OutMetaDS.GetBlock(1))
-      print OutMetaTable
+      #print OutMetaTable
       
       ErCol = OutMetaTable.GetColumn(3)
       #ErAr = Rd.GetArray(3)
@@ -889,7 +889,7 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
     ConsolidatedMarkupsNode = self.RecombineLeftRightMarkups(SpatiallyMergedLeftNode, SpatiallyMergedRightNode)
     pplWidget.SingleNodeSelector.setCurrentNode(None)
     slicer.mrmlScene.RemoveNode(MarkupsNode)
-    #slicer.util.reloadScriptedModule('preprocesslandmarks')
+    slicer.util.reloadScriptedModule('PreProcessLandmarks')
     #slicer.mrmlScene.AddNode(SpatiallyMergedLeftNode)
     #slicer.mrmlScene.AddNode(SpatiallyMergedRightNode)
     
@@ -900,14 +900,14 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
     CandidateDuplicateCoords = MarkupsNode.GetMarkupPointVector(Index, 0)
     InterCandidateDirection = [CurrentCoords[dim] - CandidateDuplicateCoords[dim] for dim in range(3)]
     AverageCandidateLocation = [(CurrentCoords[dim] + CandidateDuplicateCoords[dim])/2.0 for dim in range(3)]
-    # Boundary conditions are wwhen Index = 1 or Index = MarkupsNode.GetNumberOfFiducials()-2
+    # Boundary conditions are when Index = 1 or Index = MarkupsNode.GetNumberOfFiducials()-2
     if Index == 1:
       FirstCoordsBelow = MarkupsNode.GetMarkupPointVector(Index+1, 0)
       #SecondCoordsBelow = MarkupsNode.GetMarkupPointVector(Index+2)
       ReferenceDirection = [FirstCoordsBelow[dim] + AverageCandidateLocation[dim] for dim in range(3)]
       #CompareDirection1 = [AverageCandidateLocation[dim] - FirstCoordsBelow[dim] for dim in range(3)]
       #CompareDirection2 = [AverageCandidateLocation[dim] - SecondCoordsBelow[dim] for dim in range(3)]
-    if Index == MarkupsNode.GetNumberOfFiducials()-2:
+    elif Index == MarkupsNode.GetNumberOfFiducials()-2:
       FirstCoordsAbove = MarkupsNode.GetMarkupPointVector(Index-2, 0)
       #SecondCoordsAbove = MarkupsNode.GetMarkupPointVector(Index-3)
       ReferenceDirection = [FirstCoordsAbove[dim] - AverageCandidateLocation[dim] for dim in range(3)]
@@ -958,7 +958,7 @@ class UsSurfaceToLandmarksLogic(ScriptedLoadableModuleLogic):
       ReferenceVector1 = [CandidateReplacementCoords[dim] - RefCoords1[dim] for dim in range(3)]
       ReferenceDistance = np.linalg.norm(ReferenceVector1)
     
-    if Index == MarkupsNode.GetNumberOfFiducials() - 1:
+    elif Index == MarkupsNode.GetNumberOfFiducials() - 1:
       Point2coords = MarkupsNode.GetMarkupPointVector(Index-1, 0)
       InterCandidateVector = [Point1coords[dim] - Point2coords[dim] for dim in range(3)]
       CandidateDistance = np.linalg.norm(InterCandidateVector)
