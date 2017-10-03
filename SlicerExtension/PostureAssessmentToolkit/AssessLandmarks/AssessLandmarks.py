@@ -539,13 +539,13 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
     """
     return AlignedModelMarkupsNode
   
-  def ScaleModelToPatient(self, ModelNode, PatientNode, PolyDegree, PointsPerPolyFit):    # Returns a markups node which is AssessLandmarksLogic's self.ModelMarkupsNode, aligned with annd scaled to self.PatientMarkupsNode
+  def ScaleModelToPatient(self, ModelNode, PatientNode, PolyDegree, PointsPerPolyFit):    # Returns a markups node which is AssessLandmarksLogic's self.ModelMarkupsNode, aligned with and scaled to self.PatientMarkupsNode
     # Clear old nodes and instantiate new ones
     OldCongruentMarkupsNode = slicer.util.getNode("AvgModel for " + PatientNode.GetName())
     if OldCongruentMarkupsNode != None:
       slicer.mrmlScene.RemoveNode(OldCongruentMarkupsNode)
     
-    # Get center-points of both spine's ends
+    # Get center-points of both spines' ends
     ModelBaseCenterCoords = [(ModelNode.GetMarkupPointVector(ModelNode.GetNumberOfFiducials()-2,0)[dim] + ModelNode.GetMarkupPointVector(ModelNode.GetNumberOfFiducials()-1,0)[dim])/2.0 for dim in range(3)]
     PatientBaseCenterCoords = [(PatientNode.GetMarkupPointVector(PatientNode.GetNumberOfFiducials()-2,0)[dim] + PatientNode.GetMarkupPointVector(PatientNode.GetNumberOfFiducials()-1,0)[dim])/2.0 for dim in range(3)]
     PatientTopCenterCoords = [(PatientNode.GetMarkupPointVector(0,0)[dim] + PatientNode.GetMarkupPointVector(1,0)[dim])/2.0 for dim in range(3)]
@@ -729,6 +729,9 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
       PatientRegistrationMarkupsNode.AddFiducialFromArray(Coords)
       PatientRegistrationMarkupsNode.SetNthFiducialLabel(i, Label)
 
+    # DEBUG
+    #slicer.mrmlScene.AddNode(PatientRegistrationMarkupsNode)
+      
     # Try correcting for lateral-anterior skew
     SkewAngle = ScaleSkew * 90.0
     for RegistrationPointIndex in range(self.PatientMarkupsNode.GetNumberOfFiducials()):
@@ -783,22 +786,23 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
     self.VisualizationSurfaceModel.CreateDefaultDisplayNodes()
     self.VisualizationSurfaceModel.SetDisplayVisibility(1)
 
+    return True
     
-  def GetAnchorOffsetVector(self, Node, PointIndex):
+  def GetAnchorOffsetVector(self, MarkupsNode, PointIndex):
     # This is becomming disorganized - TODO: COme up with systematic way for applying geometry corrections
-    #LabelsCoords = [(Node.GetNthFiducialLabel(i), Node.GetMarkupPointVector(i,0)) for i in range(Node.GetNumberOfFiducials())]
-    LateralVector = self.GetLateralVector(Node, PointIndex)
+    #LabelsCoords = [(MarkupsNode.GetNthFiducialLabel(i), MarkupsNode.GetMarkupPointVector(i,0)) for i in range(MarkupsNode.GetNumberOfFiducials())]
+    LateralVector = self.GetLateralVector(MarkupsNode, PointIndex)
     LateralVectorNorm = np.linalg.norm(LateralVector)
     LateralUnitVector = [(LateralVector[dim]/LateralVectorNorm) for dim in range(3)]
     
-    AxialVector = self.GetAxialVector(Node, PointIndex)
+    AxialVector = self.GetAxialVector(MarkupsNode, PointIndex)
     AxialVectorNorm = np.linalg.norm(AxialVector)
     AxialUnitVector = [(AxialVector[dim]/AxialVectorNorm) for dim in range(3)]
     
-    InflationFactor = self.GetInflationFactor(Node, PointIndex)
+    InflationFactor = self.GetInflationFactor(MarkupsNode, PointIndex)
     #InflationCorrectionFactor = max(InflationFactor-1.0,0)
-    InflationCorrectionFactor = (abs(InflationFactor-1.0)**1.5) * np.sign((InflationFactor-1.0))
-    #print Node.GetName() + " - " + Node.GetNthFiducialLabel(PointIndex) + " ICF: " + str(InflationCorrectionFactor)
+    InflationCorrectionFactor = -(abs(InflationFactor-1.0)**1.5) * np.sign((InflationFactor-1.0))
+    #print MarkupsNode.GetName() + " - " + MarkupsNode.GetNthFiducialLabel(PointIndex) + " ICF: " + str(InflationCorrectionFactor)
 
     InflationCorrectionVector = [(LateralVector[dim] * (InflationCorrectionFactor)) for dim in range(3)]
     
@@ -809,101 +813,105 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
       
     # Scale UnscaledAnteriorVector
     #AnchorOffsetScale = np.linalg.norm(AxialVector)
-    AnchorOffsetScale = (self.GetSpineLength(Node)/(Node.GetNumberOfFiducials()/2))
+    AnchorOffsetScale = (self.GetSpineLength(MarkupsNode)/(MarkupsNode.GetNumberOfFiducials()/2))
     
     UnscaledAnteriorVectorNorm = np.linalg.norm(UnscaledAnteriorVector)
+    
     #AnchorOffsetVector = [((UnscaledAnteriorVector[dim])*(InflationFactor*AnchorOffsetScale/UnscaledAnteriorVectorNorm)) for dim in range(3)]
-    AnchorOffsetVector = [(((UnscaledAnteriorVector[dim])*(AnchorOffsetScale/(UnscaledAnteriorVectorNorm)))+InflationCorrectionVector[dim]) for dim in range(3)]
+    
+    #AnchorOffsetVector = [(((UnscaledAnteriorVector[dim])*(AnchorOffsetScale/(UnscaledAnteriorVectorNorm)))+InflationCorrectionVector[dim]) for dim in range(3)]
+    
+    AnchorOffsetVector = [((UnscaledAnteriorVector[dim])*(AnchorOffsetScale/UnscaledAnteriorVectorNorm)) for dim in range(3)]
     
     return AnchorOffsetVector
 
-  def GetLateralVector(self, Node, PointIndex):
-    (CurentLabel, CurrentCoords) = (Node.GetNthFiducialLabel(PointIndex), Node.GetMarkupPointVector(PointIndex,0))
+  def GetLateralVector(self, MarkupsNode, PointIndex):
+    (CurentLabel, CurrentCoords) = (MarkupsNode.GetNthFiducialLabel(PointIndex), MarkupsNode.GetMarkupPointVector(PointIndex,0))
     
-    if Node.GetNthFiducialLabel(PointIndex)[-1] == "L":
-      LateralNeighborCoords = Node.GetMarkupPointVector(PointIndex+1, 0)
+    if MarkupsNode.GetNthFiducialLabel(PointIndex)[-1] == "L":
+      LateralNeighborCoords = MarkupsNode.GetMarkupPointVector(PointIndex+1, 0)
       LateralVector = [(CurrentCoords[dim] - LateralNeighborCoords[dim]) for dim in range(3)]
       return LateralVector
       
-    if Node.GetNthFiducialLabel(PointIndex)[-1] == "R":
-      LateralNeighborCoords = Node.GetMarkupPointVector(PointIndex-1, 0)
+    if MarkupsNode.GetNthFiducialLabel(PointIndex)[-1] == "R":
+      LateralNeighborCoords = MarkupsNode.GetMarkupPointVector(PointIndex-1, 0)
       LateralVector = [(CurrentCoords[dim] - LateralNeighborCoords[dim]) for dim in range(3)]
       return LateralVector
 
     
-  def GetAxialVector(self, Node, PointIndex):
+  def GetAxialVector(self, MarkupsNode, PointIndex):
     ExpectedVertebraLabelsInOrder = ['T1','T2','T3','T4','T5','T6','T7','T8','T9','T10','T11','T12','L1','L2','L3','L4','L5']
-    (CurentLabel, CurrentCoords) = (Node.GetNthFiducialLabel(PointIndex), Node.GetMarkupPointVector(PointIndex,0))
+    (CurentLabel, CurrentCoords) = (MarkupsNode.GetNthFiducialLabel(PointIndex), MarkupsNode.GetMarkupPointVector(PointIndex,0))
     ExpectedOrderIndex = ExpectedVertebraLabelsInOrder.index(CurentLabel[:-1])
 
-    if PointIndex < 2:# or (Node.GetNthFiducialLabel(PointIndex-2)[:-1] == ExpectedVertebraLabelsInOrder[ExpectedOrderIndex-1] and Node.GetNthFiducialLabel(PointIndex-2)[-1] == CurentLabel[-1]):
+    if PointIndex < 2:# or (MarkupsNode.GetNthFiducialLabel(PointIndex-2)[:-1] == ExpectedVertebraLabelsInOrder[ExpectedOrderIndex-1] and Node.GetNthFiducialLabel(PointIndex-2)[-1] == CurentLabel[-1]):
       # Axial neighbor must be below current point 
       if CurentLabel[-1] == "L":
-        LeftNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+2, 0)
+        LeftNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+2, 0)
         LeftAxialVector = [(CurrentCoords[dim] - LeftNeighborBelowCoords[dim])for dim in range(3)]
-        RightNeighborBesideCoords = Node.GetMarkupPointVector(PointIndex+1, 0)
-        RightNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+3, 0)
+        RightNeighborBesideCoords = MarkupsNode.GetMarkupPointVector(PointIndex+1, 0)
+        RightNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+3, 0)
         RightAxialVector = [(RightNeighborBesideCoords[dim] - RightNeighborBelowCoords[dim])for dim in range(3)]
       else:
-        LeftNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+1, 0)
-        LeftNeighborBesideCoords = Node.GetMarkupPointVector(PointIndex-1, 0)
+        LeftNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+1, 0)
+        LeftNeighborBesideCoords = MarkupsNode.GetMarkupPointVector(PointIndex-1, 0)
         LeftAxialVector = [(LeftNeighborBesideCoords[dim] - LeftNeighborBelowCoords[dim])for dim in range(3)]
-        RightNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+2, 0)
+        RightNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+2, 0)
         RightAxialVector = [(CurrentCoords[dim] - RightNeighborBelowCoords[dim])for dim in range(3)]        
       AxialVector = [(LeftAxialVector[dim] + RightAxialVector[dim])/2.0 for dim in range(3)]
       return AxialVector
     
-    if PointIndex > Node.GetNumberOfFiducials() - 3:# (Node.GetNthFiducialLabel(PointIndex+2)[:-1] == ExpectedVertebraLabelsInOrder[ExpectedOrderIndex+1] and Node.GetNthFiducialLabel(PointIndex+2)[-1] == CurentLabel[-1]):
+    if PointIndex > MarkupsNode.GetNumberOfFiducials() - 3:# (MarkupsNode.GetNthFiducialLabel(PointIndex+2)[:-1] == ExpectedVertebraLabelsInOrder[ExpectedOrderIndex+1] and Node.GetNthFiducialLabel(PointIndex+2)[-1] == CurentLabel[-1]):
       # Axial neighbor must be above current point in markups list
       if CurentLabel[-1] == "L":
-        LeftNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-2, 0)
+        LeftNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-2, 0)
         LeftAxialVector = [(LeftNeighborAboveCoords[dim] - CurrentCoords[dim])for dim in range(3)]
-        RightNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-1, 0)
-        RightNeighborBesideCoords = Node.GetMarkupPointVector(PointIndex+1, 0)
+        RightNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-1, 0)
+        RightNeighborBesideCoords = MarkupsNode.GetMarkupPointVector(PointIndex+1, 0)
         RightAxialVector = [(RightNeighborAboveCoords[dim] - RightNeighborBesideCoords[dim])for dim in range(3)]
       else:
-        LeftNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-3, 0)
-        LeftNeighborBesideCoords = Node.GetMarkupPointVector(PointIndex-1, 0)
+        LeftNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-3, 0)
+        LeftNeighborBesideCoords = MarkupsNode.GetMarkupPointVector(PointIndex-1, 0)
         LeftAxialVector = [(LeftNeighborAboveCoords[dim] - LeftNeighborBesideCoords[dim])for dim in range(3)]
-        RightNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-2, 0)
+        RightNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-2, 0)
         RightAxialVector = [(RightNeighborAboveCoords[dim] - CurrentCoords[dim])for dim in range(3)]
       AxialVector = [(LeftAxialVector[dim] + RightAxialVector[dim])/2.0 for dim in range(3)]
       return AxialVector
       
     # ELSE: There is an axial neighbor above and below our point, we should average
     if CurentLabel[-1] == "L":
-      LeftNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-2, 0)
-      LeftNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+2, 0)
+      LeftNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-2, 0)
+      LeftNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+2, 0)
       LeftAxialVector = [(LeftNeighborAboveCoords[dim] - LeftNeighborBelowCoords[dim])/2.0 for dim in range(3)]
-      RightNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-1, 0)
-      RightNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+3, 0)
+      RightNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-1, 0)
+      RightNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+3, 0)
       RightAxialVector = [(RightNeighborAboveCoords[dim] - RightNeighborBelowCoords[dim])/2.0 for dim in range(3)]
       AxialVector = [(LeftAxialVector[dim] + RightAxialVector[dim])/2.0 for dim in range(3)]
     else: # if CurentLabel[-1] == "R"
-      LeftNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-3, 0)
-      LeftNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+1, 0)
+      LeftNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-3, 0)
+      LeftNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+1, 0)
       LeftAxialVector = [(LeftNeighborAboveCoords[dim] - LeftNeighborBelowCoords[dim])/2.0 for dim in range(3)]
-      RightNeighborAboveCoords = Node.GetMarkupPointVector(PointIndex-2, 0)
-      RightNeighborBelowCoords = Node.GetMarkupPointVector(PointIndex+2, 0)
+      RightNeighborAboveCoords = MarkupsNode.GetMarkupPointVector(PointIndex-2, 0)
+      RightNeighborBelowCoords = MarkupsNode.GetMarkupPointVector(PointIndex+2, 0)
       RightAxialVector = [(RightNeighborAboveCoords[dim] - RightNeighborBelowCoords[dim])/2.0 for dim in range(3)]
       AxialVector = [(LeftAxialVector[dim] + RightAxialVector[dim])/2.0 for dim in range(3)]
     
     return AxialVector
     
-  def GetInflationFactor(self, Node, PointIndex):
+  def GetInflationFactor(self, MarkupsNode, PointIndex):
     # Returns (VertebraWidth / ModelVertebraWidth) / (VertebraLength / ModelVertebraLength)
     # This InflationFactor serves as an estimate of how much TrP scale variation, independent of other size variation, locally dilates visualization
-    VertebraWidth = np.linalg.norm(self.GetLateralVector(Node, PointIndex))
+    VertebraWidth = np.linalg.norm(self.GetLateralVector(MarkupsNode, PointIndex))
     ModelVertebraWidth = np.linalg.norm(self.GetLateralVector(self.ModelMarkupsNode, PointIndex))
     
-    ThisAxialVector = self.GetAxialVector(Node, PointIndex)
+    ThisAxialVector = self.GetAxialVector(MarkupsNode, PointIndex)
     ThisModelAxialVector = self.GetAxialVector(self.ModelMarkupsNode, PointIndex)
     
-    if Node.GetNthFiducialLabel(PointIndex)[-1] == "L":
-      ContraLateralAxialVector = self.GetAxialVector(Node, PointIndex+1)
+    if MarkupsNode.GetNthFiducialLabel(PointIndex)[-1] == "L":
+      ContraLateralAxialVector = self.GetAxialVector(MarkupsNode, PointIndex+1)
       ContraLateralModelAxialVector = self.GetAxialVector(self.ModelMarkupsNode, PointIndex+1)
     else:
-      ContraLateralAxialVector = self.GetAxialVector(Node, PointIndex-1)
+      ContraLateralAxialVector = self.GetAxialVector(MarkupsNode, PointIndex-1)
       ContraLateralModelAxialVector = self.GetAxialVector(self.ModelMarkupsNode, PointIndex-1)
     
     PatientAxialVector = [(ThisAxialVector[dim] + ContraLateralAxialVector[dim])/2.0 for dim in range(3)]
@@ -914,19 +922,19 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
     
     InflationFactor = ((VertebraWidth/ModelVertebraWidth) / (VertebraLength/ModelVertebraLength))
     
-    #print Node.GetName() + " - " + Node.GetNthFiducialLabel(PointIndex) + " I.F. - " + str(InflationFactor)
+    #print MarkupsNode.GetName() + " - " + MarkupsNode.GetNthFiducialLabel(PointIndex) + " I.F. - " + str(InflationFactor)
     
     return InflationFactor
     
-  def RotateAnchorPointAboutAxisThroughOriginal(self, Node, PointIndex, Angle):
-    if Node.GetNthFiducialLabel(PointIndex)[-1] == "L":
+  def RotateAnchorPointAboutAxisThroughOriginal(self, MarkupsNode, PointIndex, Angle):
+    if MarkupsNode.GetNthFiducialLabel(PointIndex)[-1] == "L":
       Angle *= -1
   
-    OriginalCoords = Node.GetMarkupPointVector(PointIndex, 0)
-    CorrespondingAnchorCoords = Node.GetMarkupPointVector(PointIndex+34, 0)
+    OriginalCoords = MarkupsNode.GetMarkupPointVector(PointIndex, 0)
+    CorrespondingAnchorCoords = MarkupsNode.GetMarkupPointVector(PointIndex+34, 0)
     OriginalToAnchorCoords = [(CorrespondingAnchorCoords[dim] - OriginalCoords[dim]) for dim in range(3)]
     
-    Axis = self.GetAxialVector(Node, PointIndex)
+    Axis = self.GetAxialVector(MarkupsNode, PointIndex)
     AxisNorm = np.linalg.norm(Axis)
     UnitAxis = [(Axis[dim])/AxisNorm for dim in range(3)]
     RotMat = self.GetVtkRotationMatrixAboutAxis(Angle, UnitAxis)
@@ -937,14 +945,14 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
       for col in range(3):
         RotatedAnchorCoords[row] += OriginalToAnchorCoords[col] * RotMat.GetElement(row,col)
     
-    Node.SetNthFiducialPositionFromArray(PointIndex+34, RotatedAnchorCoords)
+    MarkupsNode.SetNthFiducialPositionFromArray(PointIndex+34, RotatedAnchorCoords)
     return True
     
-  def AnnotateDeviation(self, Node, DeviationLocumCoords, DeviationVector, DeviationName):
+  def AnnotateDeviation(self, MarkupsNode, DeviationLocumCoords, DeviationVector, DeviationName):
     # Re-initialize scene
     OldRulerNodes = slicer.util.getNodesByClass('vtkMRMLAnnotationRulerNode')
     for OldNode in OldRulerNodes:
-      if OldNode.GetName() == Node.GetName() + "_" + DeviationName:
+      if OldNode.GetName() == MarkupsNode.GetName() + "_" + DeviationName:
         slicer.mrmlScene.RemoveNode(OldNode)
     
     RecognizedNames = ['Max R','Max L','Max A','Max P']
@@ -954,12 +962,12 @@ class AssessLandmarksLogic(ScriptedLoadableModuleLogic):
       NameIndex = IsName.index(True)
     else:
       NameIndex = -1
-    NodeBaseCenterCoords = [(Node.GetMarkupPointVector(Node.GetNumberOfFiducials()-2,0)[dim] + Node.GetMarkupPointVector(Node.GetNumberOfFiducials()-1,0)[dim])/2.0 for dim in range(3)]
+    NodeBaseCenterCoords = [(MarkupsNode.GetMarkupPointVector(MarkupsNode.GetNumberOfFiducials()-2,0)[dim] + MarkupsNode.GetMarkupPointVector(MarkupsNode.GetNumberOfFiducials()-1,0)[dim])/2.0 for dim in range(3)]
     
     # Initialize node
     RulerNode = slicer.vtkMRMLAnnotationRulerNode()
     slicer.mrmlScene.AddNode(RulerNode)
-    RulerNode.SetName(Node.GetName() + "_" + DeviationName)
+    RulerNode.SetName(MarkupsNode.GetName() + "_" + DeviationName)
     
     # Set points
     RulerNode.SetPosition1(DeviationLocumCoords)
