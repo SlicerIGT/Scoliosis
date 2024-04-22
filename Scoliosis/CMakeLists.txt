@@ -8,8 +8,8 @@ set(EXTENSION_HOMEPAGE "https://www.assembla.com/spaces/Scoliosis/wiki")
 set(EXTENSION_CATEGORY "Quantification")
 set(EXTENSION_CONTRIBUTORS "Franklin King (PerkLab, Queen's University), Tamas Ungi (PerkLab, Queen's University)")
 set(EXTENSION_DESCRIPTION "Extensions pertaining to scoliosis analysis")
-set(EXTENSION_ICONURL "http://www.slicer.org/slicerWiki/images/2/2b/ScoliosisLogo.png")
-set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/images/d/d1/ScoliosisScreenshot.png")
+set(EXTENSION_ICONURL "https://www.slicer.org/slicerWiki/images/2/2b/ScoliosisLogo.png")
+set(EXTENSION_SCREENSHOTURLS "https://www.slicer.org/slicerWiki/images/d/d1/ScoliosisScreenshot.png")
 set(EXTENSION_STATUS "Experimental")
 set(EXTENSION_DEPENDS "NA") # Specified as a space separated list or 'NA' if any
 
