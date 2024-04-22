@@ -2491,7 +2491,7 @@ class Slicelet(object):
  #---------------------------------------------------------------------------------------------------------------
          
   def onStartLeftSideAcquisitionButtonClicked(self):
-      if self.estado is not "Connected":
+      if self.estado != "Connected":
         ret=qt.QMessageBox.warning(self.spineTable, 'Start Acquisition', 'You must connect to the tracker first in order to acquire the sequences.', qt.QMessageBox.Ok , qt.QMessageBox.Ok )  
         return    
       self.leftSideAcquisitionStarted = not self.leftSideAcquisitionStarted
@@ -2514,7 +2514,7 @@ class Slicelet(object):
  #---------------------------------------------------------------------------------------------------------------
          
   def onStartRightSideAcquisitionButtonClicked(self):
-      if self.estado is not "Connected":
+      if self.estado != "Connected":
         ret=qt.QMessageBox.warning(self.spineTable, 'Start Acquisition', 'You must connect to the tracker first in order to acquire the sequences.', qt.QMessageBox.Ok , qt.QMessageBox.Ok )  
         return  
       self.rightSideAcquisitionStarted = not self.rightSideAcquisitionStarted
