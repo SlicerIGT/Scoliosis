@@ -4,10 +4,11 @@ set(MODULE_NAME ScoliosisMonitoring)
 #-----------------------------------------------------------------------------
 set(MODULE_PYTHON_SCRIPTS
   ${MODULE_NAME}.py
-  ToolsViewer.py
-  VolumeRenderingPropertiesMenu.py
-  VolumeRenderingViewer.py
-  VolumesViewer.py
+  ${MODULE_NAME}Lib/__init__.py
+  ${MODULE_NAME}Lib/ToolsViewer.py
+  ${MODULE_NAME}Lib/VolumeRenderingPropertiesMenu.py
+  ${MODULE_NAME}Lib/VolumeRenderingViewer.py
+  ${MODULE_NAME}Lib/VolumesViewer.py
   )
 
 set(MODULE_PYTHON_RESOURCES
