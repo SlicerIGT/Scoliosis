@@ -138,7 +138,7 @@ class ScoliosisMonitoringWidget:
     self.angleTable.sortingEnabled = False
     self.angleTable.setEditTriggers(0)
     self.angleTable.setMinimumHeight(self.angleTable.verticalHeader().length() + 25)
-    self.angleTable.horizontalHeader().setResizeMode(qt.QHeaderView.Stretch)
+    self.angleTable.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
     self.angleTable.setSizePolicy (qt.QSizePolicy.MinimumExpanding, qt.QSizePolicy.Preferred)
     outputVerticalLayout.addWidget(self.angleTable, 2, 0, 1, 5)
     
@@ -1474,7 +1474,7 @@ class Slicelet(object):
     #self.spineTable.sortingEnabled = False
     #self.spineTable.setEditTriggers(0)
     #self.spineTable.setMinimumHeight(self.spineTable.verticalHeader().length() + 25)
-    #self.spineTable.horizontalHeader().setResizeMode(qt.QHeaderView.Stretch)
+    #self.spineTable.horizontalHeader().setSectionResizeMode(qt.QHeaderView.Stretch)
     #self.spineTable.setSizePolicy (qt.QSizePolicy.MinimumExpanding, qt.QSizePolicy.Preferred)
     
     verticalScroll =self.spineTable.verticalScrollBar()
