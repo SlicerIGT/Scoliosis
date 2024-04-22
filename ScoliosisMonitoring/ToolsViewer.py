@@ -85,13 +85,13 @@ class ToolsViewer():
 
      
 #     def onConnectedEventCaptured(self, caller,  event):
-#         print "An OpenIGTLink connection was captured!"
+#         print("An OpenIGTLink connection was captured!")
 #         igtlConnectorNode = slicer.util.getNode("Plus Server Connection") 
 #         if igtlConnectorNode is not None:
 #             self.startListeningToTransformationsModifications()
             
     def startListeningToTransformationsModifications(self):    
-        print "Tools viewer is listening to the scene"
+        print("Tools viewer is listening to the scene")
         
         referenceToTrackerNode = slicer.util.getNode("ReferenceToTracker")
         referenceToTrackerNode.RemoveAllObservers()
@@ -158,12 +158,12 @@ class ToolsViewer():
         if self.logic.isValidTransformation("ProbeToReference"):
           self.probeSemaphore.setStyleSheet(self.visibleStyle) 
           self.logic.showRedSliceIn3D(True)
-          #print "Probe Transformation is valid!!"
+          #print("Probe Transformation is valid!!")
         else:
           self.probeSemaphore.setStyleSheet(self.notVisibleStyle) 
           #slicer.util.resetSliceViews()  
           self.logic.showRedSliceIn3D(False)
-          #print "Probe Transformation is invalid!!" 
+          #print("Probe Transformation is invalid!!")
           
     def onStylusTransformationModified(self, caller,  event):
         if self.logic.isValidTransformation("StylusTipToReference"):
@@ -187,5 +187,4 @@ class ToolsViewer():
         self.startListeningToTransformationsModifications()
         slicer.util.resetSliceViews() 
         slicer.util.resetThreeDViews() 
-         
-        
+
