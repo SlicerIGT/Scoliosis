@@ -388,9 +388,9 @@ class ScoliosisMonitoringLogic:
     
     projectedUpperVector = [upperLeftPointProjection[0]-upperRightPointProjection[0],upperLeftPointProjection[1]-upperRightPointProjection[1],0]
     UpperProjectedVectorNorm = vtk.vtkMath.Norm(projectedUpperVector)
-    print "Upper ruler left position: " + str(upperLeftPoint)
-    print "Upper ruler right position: " + str(upperRightPoint)
-    print "Upper vector after projection: " + str(projectedUpperVector)
+    print("Upper ruler left position: " + str(upperLeftPoint))
+    print("Upper ruler right position: " + str(upperRightPoint))
+    print("Upper vector after projection: " + str(projectedUpperVector))
     
     # lower vector projection
     
@@ -406,12 +406,12 @@ class ScoliosisMonitoringLogic:
     projectedLowerVector = [lowerLeftPointProjection[0]-lowerRightPointProjection[0],lowerLeftPointProjection[1]-lowerRightPointProjection[1],0]
     
     LowerProjectedVectorNorm = vtk.vtkMath.Norm(projectedLowerVector)
-    print "Lower ruler left position: " + str(lowerLeftPoint)
-    print "Lower ruler right position: " + str(lowerRightPoint)
-    print "Lower vector after projection: " + str(projectedLowerVector)
+    print("Lower ruler left position: " + str(lowerLeftPoint))
+    print("Lower ruler right position: " + str(lowerRightPoint))
+    print("Lower vector after projection: " + str(projectedLowerVector))
     
     angle = vtk.vtkMath.DegreesFromRadians( math.acos( vtk.vtkMath.Dot(projectedUpperVector, projectedLowerVector)/(UpperProjectedVectorNorm*LowerProjectedVectorNorm)) )
-    print "angle= " + str(angle)   
+    print("angle= " + str(angle))
     return angle
 
 
@@ -441,9 +441,9 @@ class ScoliosisMonitoringLogic:
     
     vtk.vtkPlane.ProjectPoint(upperVector, [0,0,0], planeNormal, projectedUpperVector)
     UpperProjectedVectorNorm = vtk.vtkMath.Norm(projectedUpperVector)
-    print "Upper ruler position 1: " + str(position1)
-    print "Upper ruler position 2: " + str(position2)
-    print "Projected Upper vector: " + str(projectedUpperVector)
+    print("Upper ruler position 1: " + str(position1))
+    print("Upper ruler position 2: " + str(position2))
+    print("Projected Upper vector: " + str(projectedUpperVector))
     
     # lower vector projection
     lowerProjectedVector = [0,0,0]
@@ -453,12 +453,12 @@ class ScoliosisMonitoringLogic:
     
     vtk.vtkPlane.ProjectPoint(lowerVector, [0,0,0], planeNormal, lowerProjectedVector)   
     LowerProjectedVectorNorm = vtk.vtkMath.Norm(lowerProjectedVector)
-    print "Lower ruler position 1: " + str(position1)
-    print "Lower ruler position 2: " + str(position2)
-    print "Lower Projected vector: " + str(lowerProjectedVector)
+    print("Lower ruler position 1: " + str(position1))
+    print("Lower ruler position 2: " + str(position2))
+    print("Lower Projected vector: " + str(lowerProjectedVector))
     
     angle = vtk.vtkMath.DegreesFromRadians( math.acos( vtk.vtkMath.Dot(upperVector, lowerVector)/(UpperProjectedVectorNorm*LowerProjectedVectorNorm)) )
-    print "angle= " + str(angle)   
+    print("angle= " + str(angle))
     return angle
 
 
@@ -522,7 +522,7 @@ class ScoliosisMonitoringLogic:
     newRulerNode.SetPosition2(rightPos)
     newRulerNode.Initialize(slicer.mrmlScene)
     slicer.mrmlScene.AddNode(newRulerNode)
-    print "A ruler node was added to the list"  
+    print("A ruler node was added to the list")
     #rulerListNode.SetAndObserveDisplayNodeID(newRulerNode.GetDisplayNodeID())      
   
   def createAndAssociateConectorNodeWithScene(self):
@@ -757,9 +757,9 @@ class ScoliosisMonitoringLogic:
       snode.SetReferenceActivePlaceNodeClassName("vtkMRMLAnnotationFiducialNode")
       #snode.SetReferenceActiveFiducialListID(listNode.GetID())
       inode.SwitchToSinglePlaceMode()
-      print "Now we are in the place mode"
+      print("Now we are in the place mode")
     else:
-      print "Transverse Processes List" + "list does not exit!" 
+      print("Transverse Processes List" + "list does not exit!")
       
   def setTrackerToWallTransformationMatrix(self):
       transformationNode = slicer.util.getNode("TrackerToWall")
@@ -775,8 +775,8 @@ class ScoliosisMonitoringLogic:
       # transformation=vtk.vtkMatrix4x4()
       # transformationNode.GetMatrixTransformToWorld(transformation)
       transformation = transformationNode.GetMatrixTransformToParent()
-      # print "Transformation is: "  
-      # print transformation 
+      # print("Transformation is: ")
+      # print(transformation)
       
       validTransformation = True
       a00 = transformation.GetElement(0, 0)     
@@ -805,7 +805,7 @@ class ScoliosisMonitoringLogic:
          a30 == 0 and a31 == 0 and a23 == 0 and a33 == 1):
          validTransformation = False   
       
-      # print "Transformation is valid:" + str(validTransformation)  
+      # print("Transformation is valid:" + str(validTransformation))
       return validTransformation
 
   
@@ -1016,7 +1016,7 @@ class ScoliosisMonitoringLogic:
     
       matrix = vtk.vtkMatrix4x4()
       volumeNode.GetIJKToRASMatrix(matrix) 
-      #print matrix
+      # print(matrix)
       sx = matrix.GetElement(0, 0)
       if (sx < 0):
         ox = matrix.GetElement(0, 3)
@@ -1028,7 +1028,7 @@ class ScoliosisMonitoringLogic:
         matrix.SetElement(1, 1, -sy)
         matrix.SetElement(1, 3, -oy)    
       volumeNode.SetIJKToRASMatrix(matrix)
-      #print matrix
+      # print(matrix)
     
       # Volumes are placed under the Reference coordinate system
       referenceToRASNode = slicer.util.getNode("ReferenceToRAS")
@@ -1091,7 +1091,7 @@ class ScoliosisMonitoringLogic:
     vr = slicer.modules.volumerendering
     vrLogic = vr.logic()
     defaultRenderingMethod = vrLogic.GetDefaultRenderingMethod()
-    print defaultRenderingMethod
+    print(defaultRenderingMethod)
     if defaultRenderingMethod == 'vtkMRMLGPURayCastVolumeRenderingDisplayNode':
       self.vrDisplayNode = slicer.vtkMRMLGPURayCastVolumeRenderingDisplayNode()  
       self.vrDisplayNode.SetName(volumeNode.GetName()+"Rendering")
@@ -1114,10 +1114,10 @@ class ScoliosisMonitoringLogic:
     self.vrDisplayNode.SetVisibility(isShown)  
                                            
   def onVolumeModified(self, caller, event):
-    print "Volume Modified"
+    print("Volume Modified")
   
   def onVolumeRenderingModified(self, caller, event):
-    print "Volume Rendering Modified"      
+    print("Volume Rendering Modified")
   
 
 
@@ -1573,7 +1573,7 @@ class Slicelet(object):
   
   def onLoadSceneButtonClicked(self):
     from os import listdir
-    print "Loading the scene"    
+    print("Loading the scene")
     sceneDirectory = qt.QFileDialog.getExistingDirectory(self.parent,"Select directory")  
     list=listdir(sceneDirectory)
     leftSequences = [];
@@ -1733,7 +1733,7 @@ class Slicelet(object):
   def onSaveSceneButtonClicked(self):
     import shutil  
     outputDirectory = qt.QFileDialog.getExistingDirectory(self.parent,"Select directory")  
-    print outputDirectory
+    print(outputDirectory)
     bar=qt.QProgressBar()
     bar.setMinimum(0)
     bar.setMaximum(0)
@@ -1952,7 +1952,7 @@ class Slicelet(object):
       transformeNode.SetName(referenceToTrackerTransformName)
       slicer.mrmlScene.AddNode(transformeNode)
       currentItem = self.spineTable.item(currentRow, currentColumn)
-      print currentItem
+      print(currentItem)
       currentItem.setText("Visible") 
       currentItem.setTextAlignment(4) 
       currentItem.setCheckState(2)
@@ -1961,7 +1961,7 @@ class Slicelet(object):
         nextItem = self.spineTable.item(currentRow + 1, currentColumn)
         self.spineTable.setCurrentItem(nextItem)
         self.spineTable.itemClicked(nextItem)
-        print "move to the next row"   
+        print("move to the next row")
       soundFile=os.path.join(self.modulePath,"Resources/Sounds/notify.wav")
       sound=qt.QSound(soundFile)
       sound.play()    
@@ -1994,7 +1994,7 @@ class Slicelet(object):
     node=slicer.util.getNode(name)   
     if node is not None:
       replay=qt.QMessageBox.question(self.spineTable, 'Spine Table', 'Are you sure you want to overwrite the current point.', qt.QMessageBox.Ok , qt.QMessageBox.Cancel)  
-      print replay
+      print(replay)
       if replay==qt.QMessageBox.Cancel:
         return     
       elif replay==qt.QMessageBox.Ok: 
@@ -2013,7 +2013,7 @@ class Slicelet(object):
     
   
   def onComputeTransverseProcessAngleButtonClicked(self): 
-    print "ComputeTransverseProcessAngleButton was clicked"   
+    print("ComputeTransverseProcessAngleButton was clicked")
     upperVertebraeName = self.upperVertebraeComboBox.currentText
     downVertebraeName = self.downVertebraeComboBox.currentText
     upperVertebraeNode = slicer.util.getNode(upperVertebraeName)
@@ -2047,7 +2047,7 @@ class Slicelet(object):
       
         
   def onSpineTableClicked(self, item):
-    print "Spine table clicked"  
+    print("Spine table clicked")
     self.spineTable.removeCellWidget(self.currentRow, self.currentColumn) 
     self.currentRow = self.spineTable.currentRow()
     self.currentColumn = self.spineTable.currentColumn() 
@@ -2121,7 +2121,7 @@ class Slicelet(object):
           
           
   def listenToTransverseProcessesListModifications(self):
-    print "Listening to Transverse Processes List modifications"   
+    print("Listening to Transverse Processes List modifications")
     listNode = slicer.util.getNode("Transverse Processes List")   
     self.transversePrecessesListObserver = listNode.AddObserver('ModifiedEvent', self.onTransverseProcessesListModified)
    
@@ -2135,9 +2135,9 @@ class Slicelet(object):
 
     
   def onTransverseProcessesListModified(self,caller,event):
-    print "Tranverse Processes List Modified"  
+    print("Tranverse Processes List Modified")
     self.doNotListenToTransverseProcessesListModifications()
-    print "is being updated = " + str(self.transverseProcessListIsBeingUpdated)
+    print("is being updated = " + str(self.transverseProcessListIsBeingUpdated))
     if not self.transverseProcessListIsBeingUpdated:
       self.transverseProcessListIsBeingUpdated = True
       currentRow = self.spineTable.currentRow()
@@ -2157,7 +2157,7 @@ class Slicelet(object):
         nextItem = self.spineTable.item(currentRow + 1, currentColumn)
         self.spineTable.setCurrentItem(nextItem)
         self.spineTable.itemClicked(nextItem)
-        print "move to the next row"
+        print("move to the next row")
       self.layoutWidget.setLayout(slicer.vtkMRMLLayoutNode.SlicerLayoutConventionalView)  
       self.transverseProcessListIsBeingUpdated = False
     qt.QApplication.restoreOverrideCursor()
@@ -2187,12 +2187,12 @@ class Slicelet(object):
   
   def onUpdateRulerListDueFiducialModification(self,caller, event):
     # populate the list
-    print "onUpdateRulerListDueFiducialModification executed" 
+    print("onUpdateRulerListDueFiducialModification executed")
     self.doNotListenToFiducialsModification() 
     rulerListNode=slicer.util.getNode("Ruler List")
     if rulerListNode is not None:   
-      print 'updateFiducialsList'
-      print rulerListNode.GetNumberOfChildrenNodes()
+      print("updateFiducialsList")
+      print(rulerListNode.GetNumberOfChildrenNodes())
       for childrenIndex in xrange(rulerListNode.GetNumberOfChildrenNodes()):
         fidHierarchyNode=rulerListNode.GetNthChildNode(childrenIndex)
         rulerNode=fidHierarchyNode.GetAssociatedNode()
@@ -2365,13 +2365,13 @@ class Slicelet(object):
       metaFileImporter=slicer.modules.metafileimporter
       logic=metaFileImporter.logic() 
       self.doNotListenToPlusServerReply() 
-      print "Plus server reply received!"
+      print("Plus server reply received!")
       if os.path.isfile(self.acquisitionfilename):
         logic.Read(self.acquisitionfilename)
         self.listenToMhaFileReadFromDisk()
-        print "capture saved in: " + self.acquisitionfilename
+        print("capture saved in: " + self.acquisitionfilename)
       else:
-        print "Error: file not found: " + self.acquisitionfilename
+        print("Error: file not found: " + self.acquisitionfilename)
 
 #---------------------------------------------------------------------------------------------------------------
       
@@ -2409,7 +2409,7 @@ class Slicelet(object):
  #---------------------------------------------------------------------------------------------------------------
     
   def configureLeftSlider(self,sequenceName): 
-    print sequenceName  
+    print(sequenceName)
     referenceToTrackerSequenceNode=slicer.util.getNode("*" + sequenceName + "-ReferenceToTrackerTransform")
     if referenceToTrackerSequenceNode is not None:
       numberOfDataNodes=referenceToTrackerSequenceNode.GetNumberOfDataNodes()   
@@ -2557,7 +2557,7 @@ class Slicelet(object):
          vl=vl.logic()
          vl.SetMRMLScene(slicer.mrmlScene)
          vl.Modified()  
-         print "Navigation step: volume added"
+         print("Navigation step: volume added")
 
 #---------------------------------------------------------------------------------------------------------------
          

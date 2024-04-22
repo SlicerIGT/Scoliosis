@@ -84,7 +84,7 @@ class VolumesViewer():
         print("Volumes module was modified")
         
         numVolumes=slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLScalarVolumeNode") 
-        print "Number of volumes: " + str(numVolumes)
+        print("Number of volumes: " + str(numVolumes))
         #print('A model was added to the scene !')
         if numVolumes>0:
             for i in xrange(0,numVolumes):
@@ -144,4 +144,4 @@ class VolumesViewer():
         node=slicer.util.getNode(item.text())
         self.logic.disconnectDriverForSlice()
         self.logic.showRedSliceIn3D(True)
-        self.logic.resliceVolumeWithDriver(node)     
+        self.logic.resliceVolumeWithDriver(node)

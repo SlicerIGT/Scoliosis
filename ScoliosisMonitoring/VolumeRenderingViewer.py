@@ -94,7 +94,7 @@ class VolumeRenderingViewer():
         self.modifyVolumeRenderingButton.setEnabled(True)
     
         numVolumes=slicer.mrmlScene.GetNumberOfNodesByClass("vtkMRMLScalarVolumeNode") 
-        print "Number of volumes: " + str(numVolumes)
+        print("Number of volumes: " + str(numVolumes))
         #print('A model was added to the scene !')
         if numVolumes>0:
             for i in xrange(0,numVolumes):
@@ -160,7 +160,7 @@ class VolumeRenderingViewer():
     def onThresholdSliderMoved(self,minValue,maxValue):
         # Get the current display node
         print("Opacity Slider movement captured!")
-        #print opacity
+        # print(opacity)
         volumePropertyNode=self.currentVolumeRendering.GetVolumePropertyNode()    
         scalarOpacity=volumePropertyNode.GetScalarOpacity()
         scalarOpacity.RemoveAllPoints()
@@ -173,7 +173,7 @@ class VolumeRenderingViewer():
     def onColorSliderMoved(self,minValue,maxValue):
         # Get the current display node
         print("Color Slider movement captured!")
-        #print opacity
+        # print(opacity)
         volumePropertyNode=self.currentVolumeRendering.GetVolumePropertyNode() 
         colorTransfer=volumePropertyNode.GetColor()  
         colorTransfer.RemoveAllPoints()
@@ -187,5 +187,5 @@ class VolumeRenderingViewer():
         
         
     def onVisible3DChanged(self,isVisible):
-        #print isVisible
-        self.currentVolumeRendering.SetVisibility(isVisible)  
+        # print(isVisible)
+        self.currentVolumeRendering.SetVisibility(isVisible)
