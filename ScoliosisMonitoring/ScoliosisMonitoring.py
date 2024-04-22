@@ -1,9 +1,15 @@
-from __main__ import vtk, qt, ctk, slicer
-from VolumesViewer import *
-from VolumeRenderingViewer import *
-from ToolsViewer import *
-#from WorkInProgress import *
 import os
+
+import vtk
+import qt
+import ctk
+import slicer
+
+from ScoliosisMonitoringLib.VolumesViewer import *
+from ScoliosisMonitoringLib.VolumeRenderingViewer import *
+from ScoliosisMonitoringLib.ToolsViewer import *
+#from ScoliosisMonitoringLib.WorkInProgress import *
+
 #
 # ScoliosisMonitoring
 #
